@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export VERSION=${1:?"version is required"}
+
+export BUILD=$(pwd)/build/$arch
+mkdir -p $BUILD
+
+gox -osarch="darwin/amd64" -output="${BUILD}/{{.Dir}}" github.com/nitrous-io/tug

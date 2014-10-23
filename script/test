@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+go get github.com/onsi/ginkgo/ginkgo
+ginkgo -r -trace -keepGoing -noisyPendings=false $*
