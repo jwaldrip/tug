@@ -21,6 +21,7 @@ type Tugfile struct {
 	Docker    bool
 	LocalEnv  map[string]string
 	DockerEnv map[string]string
+	UserEnv   map[string]string
 	Gateway   string
 	Name      string
 	Processes []*TugfileProcess
@@ -69,6 +70,13 @@ func NewTugfile(filename string) (*Tugfile, error) {
 		tf.Docker = true
 	}
 
+	if _, err = os.Stat(filepath.Join(tf.Root, ".env")); !os.IsNotExist(err) {
+		env, _ := ReadEnv(filepath.Join(tf.Root, ".env"))
+		for key, val := range env {
+			tf.UserEnv[key] = val
+		}
+	}
+
 	return tf, nil
 }
 
@@ -82,6 +90,7 @@ func TugfileFromReader(reader io.Reader) (*Tugfile, error) {
 	tf.BasePort = 5000
 	tf.LocalEnv = make(map[string]string)
 	tf.DockerEnv = make(map[string]string)
+	tf.UserEnv = make(map[string]string)
 	tf.Processes = make([]*TugfileProcess, 0)
 	tf.Root = ""
 
@@ -194,6 +203,11 @@ func (tf *Tugfile) DockerRun(process *TugfileProcess, command string) *exec.Cmd 
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
 
+	for k, v := range tf.UserEnv {
+		args = append(args, "-e")
+		args = append(args, fmt.Sprintf("%s=%s", k, v))
+	}
+
 	for local, remote := range process.Sync {
 		l, _ := filepath.Abs(local)
 		r, _ := filepath.Abs(remote)
@@ -241,6 +255,9 @@ func (tf *Tugfile) startProcess(process *TugfileProcess, port int, wg *sync.Wait
 			cmd := exec.Command("bash", "-c", process.Command)
 			cmd.Env = tf.envAsArray(tf.LocalEnv)
 			cmd.Env = append(cmd.Env, fmt.Sprintf("PORT=%d", port))
+			for _, item := range tf.envAsArray(tf.UserEnv) {
+				cmd.Env = append(cmd.Env, item)
+			}
 			cmd.Stdout = w
 			cmd.Stderr = w
 			cmd.Start()
