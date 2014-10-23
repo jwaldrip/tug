@@ -52,8 +52,6 @@ For Tug to work most effectively your `Dockerfile` should include the following:
 
 * The listening web port should be specified with an `EXPOSE` statement
 * The app's code should be included from the local directory using an `ADD` statement
-* The app's startup command should be defined using `CMD`
-* The app's command in `Tugfile` should be empty.
 
 ##### Example Dockerfile
 
@@ -65,17 +63,7 @@ ENV PORT 3000
 
 WORKDIR /app
 <b>ADD . /app</b>
-
-<b>CMD ["bundle", "exec", "unicorn", "-p", "$PORT"]</b>
 </pre>
 
 [docker]: https://www.docker.com/whatisdocker/
 [golang]: http://golang.org/
-
-##### Updated Tugfile
-
-<pre>
-web:
-postgres: docker/postgres:9.3.5
-redis:    docker/redis:2.8.9
-</pre>
