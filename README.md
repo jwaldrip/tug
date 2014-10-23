@@ -46,11 +46,11 @@ If your application expects env vars to be named differently, alias them in your
 
 If your repo has a `Dockerfile`, tug will use it to build and run your app in [Docker][docker] while setting up appropriate port forwarding and file synchronization.
 
-Your `Dockerfile` should do the following:
+For Tug to work most effectively your `Dockerfile` should include the following:
 
-* Expose the listening web port using an `EXPOSE` statement
-* Inject the code into the container with an `ADD` statement
-* Start the app using a `CMD` statement
+* The listening web port should be specified with an `EXPOSE` statement
+* The app's code should be included from the local directory using an `ADD` statement
+* The app's startup command should be defined using `CMD`
 
 ##### Example Dockerfile
 
