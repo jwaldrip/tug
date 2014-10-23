@@ -14,14 +14,13 @@ Use Docker for development
     
 ## Create a Tugfile
 
-    web:      bin/start-my-web-app -p $PORT
+    web:      bin/web -p $PORT
     postgres: docker/postgres:9.3.5
     redis:    docker/redis:2.8.9
 
 ## Start the app
 
     $ tug start
-    web      | starting web app on port 5000
     postgres | fixing permissions on existing directory /var/lib/postgresql/data ... ok
     postgres | creating subdirectories ... ok
     postgres | selecting default max_connections ... 100
@@ -35,7 +34,13 @@ Tug will set environment variables in the Docker [container linking](https://doc
     POSTGRES_PORT_5432_TCP=tcp://127.0.0.1:5000
     POSTGRES_PORT_5432_TCP_PROTO=tcp
     POSTGRES_PORT_5432_TCP_ADDR=127.0.0.1
-    POSTGRES_PORT_5432_TCP_ADDR=5000
+    POSTGRES_PORT_5432_TCP_PORT=5000
+
+##### Aliasing ENV vars
+
+If your application expects env vars to be named differently, alias them in your Tugfile command:
+
+    web: env DATABASE_HOST=$POSTGRES_PORT_5432_ADDR bin/web
 
 ## Dockerfile
 
@@ -47,7 +52,7 @@ Your `Dockerfile` should do the following:
 * Expose the listening web port using an `EXPOSE` statement
 * Start the app using a `CMD` statement
 
-#### Example Dockerfile
+##### Example Dockerfile
 
     FROM ruby:2.1.2
     ENV PORT 3000
