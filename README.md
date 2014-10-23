@@ -48,18 +48,28 @@ If your repo has a `Dockerfile`, tug will use it and run your app in [Docker][do
 
 Your `Dockerfile` should do the following:
 
-* Inject the code into the container with an `ADD` statement
 * Expose the listening web port using an `EXPOSE` statement
+* Inject the code into the container with an `ADD` statement
 * Start the app using a `CMD` statement
 
 ##### Example Dockerfile
 
-    FROM ruby:2.1.2
-    ENV PORT 3000
-    EXPOSE 3000
-    ADD . /app
-    WORKDIR /app
-    CMD bin/start-my-web-app -p 3000
+<pre>
+FROM ruby:2.1.2
+
+# cache bundler artifacts
+ADD Gemfile /app/Gemfile
+ADD Gemfile.lock /app/Gemfile.lock
+RUN bundle install
+
+ENV PORT 3000
+<b>EXPOSE 3000</b>
+
+WORKDIR /app
+<b>ADD . /app</b>
+
+<b>CMD bundle exec unicorn -p $PORT</b>
+</pre>
 
 [docker]: https://www.docker.com/whatisdocker/
 [golang]: http://golang.org/
