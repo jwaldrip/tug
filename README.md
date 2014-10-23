@@ -38,7 +38,7 @@ Tug will set environment variables in the Docker [container linking format](http
 
 ##### Aliasing ENV vars
 
-If your application expects env vars to be named differently, alias them in your Tugfile command:
+If your application expects env vars to be named differently, alias them in your `Tugfile`:
 
     web: env DATABASE_HOST=$POSTGRES_PORT_5432_ADDR bin/web
 
