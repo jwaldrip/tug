@@ -61,6 +61,11 @@ func message(format string, a ...interface{}) {
 func main() {
 	defer handlePanic()
 
+	if os.Getenv("DOCKER_HOST") == "" {
+		fmt.Println("$DOCKER_HOST not specified, tug cannot run.")
+		os.Exit(2)
+	}
+
 	args := os.Args[1:]
 	if len(args) < 1 {
 		usage()
