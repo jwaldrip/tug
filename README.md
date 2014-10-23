@@ -57,11 +57,6 @@ Your `Dockerfile` should do the following:
 <pre>
 FROM ruby:2.1.2
 
-# cache bundler artifacts
-ADD Gemfile /app/Gemfile
-ADD Gemfile.lock /app/Gemfile.lock
-RUN bundle install
-
 ENV PORT 3000
 <b>EXPOSE 3000</b>
 
