@@ -44,7 +44,7 @@ If your application expects env vars to be named differently, alias them in your
 
 ## Dockerfile
 
-If your repo has a `Dockerfile`, tug will use it and run your app in [Docker][docker] setting up appropriate port forwarding and file synchronization.
+If your repo has a `Dockerfile`, tug will use it to build and run your app in [Docker][docker] while setting up appropriate port forwarding and file synchronization.
 
 Your `Dockerfile` should do the following:
 
