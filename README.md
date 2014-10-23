@@ -63,7 +63,7 @@ ENV PORT 3000
 WORKDIR /app
 <b>ADD . /app</b>
 
-<b>CMD bundle exec unicorn -p $PORT</b>
+<b>CMD ["bundle", "exec", "unicorn", "-p", "$PORT"]</b>
 </pre>
 
 [docker]: https://www.docker.com/whatisdocker/
