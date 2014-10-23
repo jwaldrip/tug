@@ -75,7 +75,7 @@ WORKDIR /app
 ##### Updated Tugfile
 
 <pre>
-web:      # from dockerfile
+web:
 postgres: docker/postgres:9.3.5
 redis:    docker/redis:2.8.9
 </pre>
