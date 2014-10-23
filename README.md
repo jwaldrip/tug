@@ -29,7 +29,7 @@ Use Docker for development
 
 ## Container linking
 
-Tug will set environment variables in the Docker [container linking](https://docs.docker.com/userguide/dockerlinks/#environment-variables) format, like this:
+Tug will set environment variables in the Docker [container linking format](https://docs.docker.com/userguide/dockerlinks/#environment-variables), like this:
 
     POSTGRES_PORT_5432_TCP=tcp://127.0.0.1:5000
     POSTGRES_PORT_5432_TCP_PROTO=tcp
