@@ -166,6 +166,22 @@ func (tf *Tugfile) Forward() {
 				tf.LocalEnv[fmt.Sprintf("%s_PORT", prefix)] = exts
 				tf.LocalEnv[fmt.Sprintf("%s_PROTO", prefix)] = "tcp"
 			}
+		case "local":
+			if tf.Docker {
+				for i, port := range DockerPorts(process.Tag) {
+					ext := tf.portFor(process.Name, i)
+					exts := strconv.Itoa(ext)
+					process.Ports[exts] = port
+					prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(process.Name), port)
+
+					go tf.forwardPort(ext, fmt.Sprintf("%s:%d", tf.Gateway, ext))
+
+					tf.DockerEnv[prefix] = fmt.Sprintf("tcp://%s:%s", tf.Gateway, exts)
+					tf.DockerEnv[fmt.Sprintf("%s_ADDR", prefix)] = tf.Gateway
+					tf.DockerEnv[fmt.Sprintf("%s_PORT", prefix)] = exts
+					tf.DockerEnv[fmt.Sprintf("%s_PROTO", prefix)] = "tcp"
+				}
+			}
 		}
 	}
 }
