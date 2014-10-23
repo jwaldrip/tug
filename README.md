@@ -18,6 +18,8 @@ Use Docker for development
     postgres: docker/postgres:9.3.5
     redis:    docker/redis:2.8.9
 
+If any command starts with `docker/` the rest will be interpreted as a docker image tag.
+
 ## Start the app
 
     $ tug start
