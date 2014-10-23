@@ -21,7 +21,7 @@ Use Docker for development
 ## Start the app
 
     $ tug start
-    postgres | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+    postgres | fixing permissions on existing onesory /var/lib/postgresql/data ... ok
     postgres | creating subdirectories ... ok
     postgres | selecting default max_connections ... 100
     postgres | selecting default shared_buffers ... 128MB
@@ -44,7 +44,7 @@ If your application expects env vars to be named differently, alias them in your
 
 ## Dockerfile
 
-If your repo has a `Dockerfile`, tug will use it and run your app in [Docker][docker] setting up the proper port forwards and directory synchronization.
+If your repo has a `Dockerfile`, tug will use it and run your app in [Docker][docker] setting up appropriate port forwarding and file synchronization.
 
 Your `Dockerfile` should do the following:
 
