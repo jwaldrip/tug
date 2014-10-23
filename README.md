@@ -58,6 +58,7 @@ Your `Dockerfile` should do the following:
     ENV PORT 3000
     EXPOSE 3000
     ADD . /app
+    WORKDIR /app
     CMD bin/start-my-web-app -p 3000
 
 [docker]: https://www.docker.com/whatisdocker/
