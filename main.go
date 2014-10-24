@@ -63,7 +63,7 @@ func main() {
 
 	if os.Getenv("DOCKER_HOST") == "" {
 		fmt.Println("$DOCKER_HOST not specified, tug cannot run.")
-		os.Exit(2)
+		os.Exit(1)
 	}
 
 	args := os.Args[1:]
