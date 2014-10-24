@@ -91,11 +91,10 @@ func checkDockerHost() {
 
 func main() {
 	defer handlePanic()
-	if os.Getenv("DOCKER_HOST") == "" {
-		os.Setenv("DOCKER_HOST", "unix:///var/lib/docker.sock")
+	if DockerPs().Run() != nil {
+		fmt.Println("docker unavailable")
+		os.Exit(0)
 	}
-
-	checkDockerHost()
 
 	args := os.Args[1:]
 	if len(args) < 1 {

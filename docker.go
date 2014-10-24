@@ -44,6 +44,10 @@ func DockerPorts(tag string) []string {
 	return ports
 }
 
+func DockerPs() *exec.Cmd {
+	return exec.Command("docker", "ps")
+}
+
 func DockerPull(tag string) *exec.Cmd {
 	return exec.Command("docker", "pull", tag)
 }
