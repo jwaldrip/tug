@@ -6,7 +6,7 @@ Use Docker for development
 
 * [Docker][docker] >= 1.3
 * [Golang][golang] >= 1.3
-* Working `DOCKER_HOST` (non-Linux users see [boot2docker](http://boot2docker.io/))
+* Working Docker host (non-Linux users see [boot2docker](http://boot2docker.io/))
 
 ## Installation
 
