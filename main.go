@@ -1,13 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"net"
-	"net/url"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/nitrous-io/tug/Godeps/_workspace/src/github.com/mgutz/ansi"
 )
@@ -61,32 +56,6 @@ func fail(format string, a ...interface{}) {
 func message(format string, a ...interface{}) {
 	banner := ansi.ColorCode("blue+h:black") + "tug" + ansi.ColorCode("green:black") + ":" + ansi.ColorCode("reset")
 	fmt.Printf(fmt.Sprintf("%s %s", banner, format), a...)
-}
-
-func checkDockerHost() {
-	var dockerURL *url.URL
-	var err error
-	var conn net.Conn
-	var status string
-
-	dockerURL, err = url.Parse(os.Getenv("DOCKER_HOST"))
-	if err == nil {
-		conn, err = net.Dial(dockerURL.Scheme, dockerURL.Host)
-		if err == nil {
-			conn.SetWriteDeadline(time.Now().Add(2 * time.Second))
-			conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-			fmt.Fprintf(conn, "GET /_ping HTTP/1.0\r\n\r\n")
-			status, err = bufio.NewReader(conn).ReadString('\n')
-			if !strings.Contains(status, "HTTP/1.0 200 OK") {
-				err = fmt.Errorf("invalid status: %s", status)
-			}
-		}
-	}
-
-	if err != nil {
-		fmt.Printf("invalid docker host: %s\n", err)
-		os.Exit(1)
-	}
 }
 
 func main() {
