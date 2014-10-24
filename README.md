@@ -70,4 +70,4 @@ WORKDIR /app
 
 ## Contributors
 
-Tug's development is sponsored by [Nitrous.IO](https://www.nitrous.io/) and built by [these contributors](https://github.com/nitrous-io/tug/graphs/contributors).
+Tug's development is sponsored by [Nitrous.IO](https://www.nitrous.io/) and is built by [these contributors](https://github.com/nitrous-io/tug/graphs/contributors).
