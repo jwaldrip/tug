@@ -60,6 +60,9 @@ func message(format string, a ...interface{}) {
 
 func main() {
 	defer handlePanic()
+	if DockerPs().Run() != nil {
+		die(fmt.Errorf("Docker unavailable"))
+	}
 
 	args := os.Args[1:]
 	if len(args) < 1 {
