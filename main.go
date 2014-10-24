@@ -1,8 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/nitrous-io/tug/Godeps/_workspace/src/github.com/mgutz/ansi"
 )
@@ -58,13 +63,39 @@ func message(format string, a ...interface{}) {
 	fmt.Printf(fmt.Sprintf("%s %s", banner, format), a...)
 }
 
-func main() {
-	defer handlePanic()
+func checkDockerHost() {
+	var dockerURL *url.URL
+	var err error
+	var conn net.Conn
+	var status string
 
-	if os.Getenv("DOCKER_HOST") == "" {
-		fmt.Println("$DOCKER_HOST not specified, tug cannot run.")
+	dockerURL, err = url.Parse(os.Getenv("DOCKER_HOST"))
+	if err == nil {
+		conn, err = net.Dial(dockerURL.Scheme, dockerURL.Host)
+		if err == nil {
+			conn.SetWriteDeadline(time.Now().Add(2 * time.Second))
+			conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+			fmt.Fprintf(conn, "GET /_ping HTTP/1.0\r\n\r\n")
+			status, err = bufio.NewReader(conn).ReadString('\n')
+			if !strings.Contains(status, "HTTP/1.0 200 OK") {
+				err = fmt.Errorf("invalid status: %s", status)
+			}
+		}
+	}
+
+	if err != nil {
+		fmt.Printf("invalid docker host: %s", err)
 		os.Exit(1)
 	}
+}
+
+func main() {
+	defer handlePanic()
+	if os.Getenv("DOCKER_HOST") == "" {
+		os.Setenv("DOCKER_HOST", "unix:///var/lib/docker.sock")
+	}
+
+	checkDockerHost()
 
 	args := os.Args[1:]
 	if len(args) < 1 {
