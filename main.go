@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/nitrous-io/tug/Godeps/_workspace/src/github.com/mgutz/ansi"
 )
@@ -58,11 +59,25 @@ func message(format string, a ...interface{}) {
 	fmt.Printf(fmt.Sprintf("%s %s", banner, format), a...)
 }
 
+func checkDocker() {
+	done := make(chan error)
+	go func() {
+		done <- DockerPs().Run()
+	}()
+	select {
+	case err := <-done:
+		if err != nil {
+			die(fmt.Errorf("docker unavailable"))
+		}
+	case <-time.After(2 * time.Second):
+		die(fmt.Errorf("docker unavailable"))
+	}
+}
+
 func main() {
 	defer handlePanic()
-	if DockerPs().Run() != nil {
-		die(fmt.Errorf("Docker unavailable"))
-	}
+
+	checkDocker()
 
 	args := os.Args[1:]
 	if len(args) < 1 {
