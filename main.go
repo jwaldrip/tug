@@ -84,7 +84,7 @@ func checkDockerHost() {
 	}
 
 	if err != nil {
-		fmt.Printf("invalid docker host: %s", err)
+		fmt.Printf("invalid docker host: %s\n", err)
 		os.Exit(1)
 	}
 }
