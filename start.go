@@ -63,6 +63,6 @@ func runStart(c *Command, args []string) {
 	tf.Name = filepath.Base(abs)
 
 	tf.Build()
-	tf.Forward()
+	tf.ResolveLinks()
 	tf.Start(flagPort)
 }

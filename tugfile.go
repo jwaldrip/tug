@@ -19,9 +19,7 @@ import (
 type Tugfile struct {
 	BasePort  int
 	Docker    bool
-	LocalEnv  map[string]string
-	DockerEnv map[string]string
-	UserEnv   map[string]string
+	Env       map[string]string
 	Gateway   string
 	Name      string
 	Processes []*TugfileProcess
@@ -35,6 +33,7 @@ type TugfileProcess struct {
 	Adapter string
 	Command string
 
+	Env   map[string]string
 	Ports map[string]string
 	Sync  map[string]string
 	Tag   string
@@ -73,7 +72,7 @@ func NewTugfile(filename string) (*Tugfile, error) {
 	if _, err = os.Stat(filepath.Join(tf.Root, ".env")); !os.IsNotExist(err) {
 		env, _ := ReadEnv(filepath.Join(tf.Root, ".env"))
 		for key, val := range env {
-			tf.UserEnv[key] = val
+			tf.Env[key] = val
 		}
 	}
 
@@ -88,9 +87,7 @@ func TugfileFromReader(reader io.Reader) (*Tugfile, error) {
 	tf := &Tugfile{}
 
 	tf.BasePort = 5000
-	tf.LocalEnv = make(map[string]string)
-	tf.DockerEnv = make(map[string]string)
-	tf.UserEnv = make(map[string]string)
+	tf.Env = make(map[string]string)
 	tf.Processes = make([]*TugfileProcess, 0)
 	tf.Root = ""
 
@@ -109,7 +106,7 @@ func TugfileFromReader(reader io.Reader) (*Tugfile, error) {
 			adapter = "docker"
 			command = m[1]
 		}
-		p := &TugfileProcess{Name: matches[1], Adapter: adapter, Command: command, Ports: map[string]string{}, Sync: map[string]string{}}
+		p := &TugfileProcess{Name: matches[1], Adapter: adapter, Command: command, Env: map[string]string{}, Ports: map[string]string{}, Sync: map[string]string{}}
 		tf.Processes = append(tf.Processes, p)
 	}
 
@@ -136,51 +133,58 @@ func (tf *Tugfile) Build() {
 	}
 }
 
-func (tf *Tugfile) Forward() {
+func (tf *Tugfile) ResolveLinks() {
 	DockerStop(tf.DockerName("forward"))
 	local, remote := net.Pipe()
 	forward := DockerRun("-i", "--privileged", "--name", tf.DockerName("forward"), "nitrousio/docker-forward")
 	forward.Stdin = remote
 	forward.Stdout = remote
-	//forward.Stderr = os.Stdout
 	forward.Start()
 	tf.forward = muxado.Client(local)
 
-	for _, process := range tf.Processes {
-		switch process.Adapter {
+	links := make(map[string]string)
+
+	for psidx, ps := range tf.Processes {
+		switch ps.Adapter {
 		case "docker":
-			for i, port := range DockerPorts(process.Tag) {
-				ext := tf.portFor(process.Name, i)
-				exts := strconv.Itoa(ext)
-				process.Ports[exts] = port
-				prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(process.Name), port)
-
+			for portidx, port := range DockerPorts(ps.Tag) {
+				ext := tf.BasePort + (psidx * 100) + portidx
+				prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(ps.Name), port)
+				links[prefix] = strconv.Itoa(ext)
+				ps.Ports[strconv.Itoa(ext)] = port
 				go tf.forwardPort(ext, fmt.Sprintf("%s:%d", tf.Gateway, ext))
-
-				tf.DockerEnv[prefix] = fmt.Sprintf("tcp://%s:%s", tf.Gateway, exts)
-				tf.DockerEnv[fmt.Sprintf("%s_ADDR", prefix)] = tf.Gateway
-				tf.DockerEnv[fmt.Sprintf("%s_PORT", prefix)] = exts
-				tf.DockerEnv[fmt.Sprintf("%s_PROTO", prefix)] = "tcp"
-				tf.LocalEnv[prefix] = fmt.Sprintf("tcp://%s:%s", "127.0.0.1", exts)
-				tf.LocalEnv[fmt.Sprintf("%s_ADDR", prefix)] = "127.0.0.1"
-				tf.LocalEnv[fmt.Sprintf("%s_PORT", prefix)] = exts
-				tf.LocalEnv[fmt.Sprintf("%s_PROTO", prefix)] = "tcp"
 			}
 		case "local":
 			if tf.Docker {
-				for i, port := range DockerPorts(process.Tag) {
-					ext := tf.portFor(process.Name, i)
-					exts := strconv.Itoa(ext)
-					process.Ports[exts] = port
-					prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(process.Name), port)
-
+				for portidx, port := range DockerPorts(ps.Tag) {
+					ext := tf.BasePort + (psidx * 100) + portidx
+					prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(ps.Name), port)
+					links[prefix] = strconv.Itoa(ext)
+					ps.Ports[strconv.Itoa(ext)] = port
 					go tf.forwardPort(ext, fmt.Sprintf("%s:%d", tf.Gateway, ext))
-
-					tf.DockerEnv[prefix] = fmt.Sprintf("tcp://%s:%s", tf.Gateway, exts)
-					tf.DockerEnv[fmt.Sprintf("%s_ADDR", prefix)] = tf.Gateway
-					tf.DockerEnv[fmt.Sprintf("%s_PORT", prefix)] = exts
-					tf.DockerEnv[fmt.Sprintf("%s_PROTO", prefix)] = "tcp"
 				}
+			} else {
+				port := tf.BasePort + (psidx * 100)
+				prefix := fmt.Sprintf("%s_PORT_%d_TCP", strings.ToUpper(ps.Name), port)
+				links[prefix] = strconv.Itoa(port)
+			}
+		}
+		if !(ps.Adapter == "local" && tf.Docker) {
+		}
+	}
+
+	for _, ps := range tf.Processes {
+		for prefix, port := range links {
+			if ps.Adapter == "local" && !tf.Docker {
+				ps.Env[prefix] = fmt.Sprintf("tcp://127.0.0.1:%s", port)
+				ps.Env[fmt.Sprintf("%s_ADDR", prefix)] = "127.0.0.1"
+				ps.Env[fmt.Sprintf("%s_PORT", prefix)] = port
+				ps.Env[fmt.Sprintf("%s_PROTO", prefix)] = "tcp"
+			} else {
+				ps.Env[prefix] = fmt.Sprintf("tcp://%s:%s", tf.Gateway, port)
+				ps.Env[fmt.Sprintf("%s_ADDR", prefix)] = tf.Gateway
+				ps.Env[fmt.Sprintf("%s_PORT", prefix)] = port
+				ps.Env[fmt.Sprintf("%s_PROTO", prefix)] = "tcp"
 			}
 		}
 	}
@@ -214,12 +218,12 @@ func (tf *Tugfile) DockerName(name string) string {
 func (tf *Tugfile) DockerRun(process *TugfileProcess, command string) *exec.Cmd {
 	args := []string{"--privileged", "-i", "--name", tf.DockerName(process.Name)}
 
-	for k, v := range tf.DockerEnv {
+	for k, v := range tf.Env {
 		args = append(args, "-e")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
 
-	for k, v := range tf.UserEnv {
+	for k, v := range process.Env {
 		args = append(args, "-e")
 		args = append(args, fmt.Sprintf("%s=%s", k, v))
 	}
@@ -269,11 +273,14 @@ func (tf *Tugfile) startProcess(process *TugfileProcess, port int, wg *sync.Wait
 			cmd.Start()
 		} else {
 			cmd := exec.Command("bash", "-c", process.Command)
-			cmd.Env = tf.envAsArray(tf.LocalEnv)
-			cmd.Env = append(cmd.Env, fmt.Sprintf("PORT=%d", port))
-			for _, item := range tf.envAsArray(tf.UserEnv) {
+			cmd.Env = os.Environ()
+			for _, item := range tf.envAsArray(tf.Env) {
 				cmd.Env = append(cmd.Env, item)
 			}
+			for _, item := range tf.envAsArray(process.Env) {
+				cmd.Env = append(cmd.Env, item)
+			}
+			cmd.Env = append(cmd.Env, fmt.Sprintf("PORT=%d", port))
 			cmd.Stdout = w
 			cmd.Stderr = w
 			cmd.Start()
@@ -324,9 +331,6 @@ func (tf *Tugfile) portFor(name string, idx int) int {
 }
 
 func (tf *Tugfile) envAsArray(in map[string]string) (out []string) {
-	for _, pair := range os.Environ() {
-		out = append(out, pair)
-	}
 	for name, val := range in {
 		out = append(out, fmt.Sprintf("%s=%s", name, val))
 	}
