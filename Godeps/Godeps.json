@@ -2,23 +2,9 @@
 	"ImportPath": "github.com/nitrous-io/tug",
 	"GoVersion": "go1.3.3",
 	"Packages": [
-		"./..."
+		"."
 	],
 	"Deps": [
-		{
-			"ImportPath": "github.com/ddollar/gobrake",
-			"Comment": "v1-3-g9859c0d",
-			"Rev": "9859c0db30293195f9f8b58337c50b9ed457d2da"
-		},
-		{
-			"ImportPath": "github.com/go-fsnotify/fsnotify",
-			"Comment": "v1.0.3",
-			"Rev": "a233047b9aa7c887a61db9375f12b8e4249948ef"
-		},
-		{
-			"ImportPath": "github.com/golang/glog",
-			"Rev": "d1c4472bf2efd3826f2b5bdcc02d8416798d678c"
-		},
 		{
 			"ImportPath": "github.com/inconshreveable/muxado",
 			"Rev": "f693c7e88ba316d1a0ae3e205e22a01aa3ec2848"
@@ -26,10 +12,6 @@
 		{
 			"ImportPath": "github.com/mgutz/ansi",
 			"Rev": "376eb392d7d7e2ae025da0037c73cf8c20a428d8"
-		},
-		{
-			"ImportPath": "github.com/mreiferson/go-httpclient",
-			"Rev": "c121dfe45d66997e43e25a6823fbe7466c8403fe"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
