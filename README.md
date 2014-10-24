@@ -67,3 +67,7 @@ WORKDIR /app
 
 [docker]: https://www.docker.com/whatisdocker/
 [golang]: http://golang.org/
+
+## Contributors
+
+Tug's development is sponsored by [Nitrous.IO](https://www.nitrous.io/) and built by [these contributors](https://github.com/nitrous-io/tug/graphs/contributors).
