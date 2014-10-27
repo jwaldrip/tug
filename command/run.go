@@ -1,4 +1,4 @@
-package commands
+package command
 
 import (
 	"fmt"
@@ -9,17 +9,17 @@ import (
 	"github.com/nitrous-io/tug/docker"
 )
 
-var cmdRun = cli.NewSubCommand("run", "Run a command on an running container.", runRun)
+var Run = cli.NewSubCommand("run", "Run a command on an running container.", runRun)
 
 func init() {
-	cmdRun.SetLongDescription(`
+	Run.SetLongDescription(`
 Run a command on an running container.
 
 Examples:
 
   tug run web rake db:create
 	`)
-	cmdRun.DefineParams("container", "command")
+	Run.DefineParams("container", "command")
 }
 
 func runRun(c cli.Command) {

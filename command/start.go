@@ -1,4 +1,4 @@
-package commands
+package command
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 	"github.com/nitrous-io/tug/tugfile"
 )
 
-var cmdStart = cli.NewSubCommand("start", "Start the application", runStart)
+var Start = cli.NewSubCommand("start", "Start the application", runStart)
 
 var flagPort int
 var flagVerbose bool
@@ -18,20 +18,19 @@ var flagVerbose bool
 var ignores map[string]bool
 
 func init() {
-	cmdStart.SetLongDescription(`
+	Start.SetLongDescription(`
 Start the application in the current directory.
 
 Examples:
 
   tug start
-  tug start -f 5000:3000 -s .:/app
-  tug start -c "make run"
+  tug start -p 9000 -v
 	`)
 
-	cmdStart.DefineIntFlagVar(&flagPort, "port", 5000, "base port")
-	cmdStart.AliasFlag('p', "port")
-	cmdStart.DefineBoolFlagVar(&flagVerbose, "verbose", false, "show verbose output")
-	cmdStart.AliasFlag('v', "verbose")
+	Start.DefineIntFlagVar(&flagPort, "port", 5000, "base port")
+	Start.AliasFlag('p', "port")
+	Start.DefineBoolFlagVar(&flagVerbose, "verbose", false, "show verbose output")
+	Start.AliasFlag('v', "verbose")
 
 	ignores = make(map[string]bool)
 }

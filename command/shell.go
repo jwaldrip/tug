@@ -1,4 +1,4 @@
-package commands
+package command
 
 import (
 	"fmt"
@@ -9,17 +9,17 @@ import (
 	"github.com/nitrous-io/tug/docker"
 )
 
-var cmdShell = cli.NewSubCommand("shell", "Open a shell in a running container.", runShell)
+var Shell = cli.NewSubCommand("shell", "Open a shell in a running container.", runShell)
 
 func init() {
-	cmdShell.SetLongDescription(`
+	Shell.SetLongDescription(`
 Open a shell on a running container.
 
 Examples:
 
   tug shell web
   `)
-	cmdShell.DefineParams("container")
+	Shell.DefineParams("container")
 }
 
 func runShell(c cli.Command) {

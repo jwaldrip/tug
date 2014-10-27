@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/nitrous-io/tug/Godeps/_workspace/src/github.com/jwaldrip/odin/cli"
-	"github.com/nitrous-io/tug/commands"
+	"github.com/nitrous-io/tug/command"
 	"github.com/nitrous-io/tug/docker"
 	"github.com/nitrous-io/tug/helpers"
 )
@@ -14,7 +14,11 @@ import (
 var tug = cli.New(VERSION, "Docker development workflow", cli.ShowUsage)
 
 func init() {
-	tug.AddSubCommands(commands.Commands...)
+	tug.AddSubCommands(
+		command.Start,
+		command.Shell,
+		command.Run,
+	)
 }
 
 func handlePanic() {
