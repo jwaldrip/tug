@@ -12,11 +12,7 @@ import (
 
 var cmdStart = cli.NewSubCommand("start", "Start the application", runStart)
 
-var flagForward stringSet
-var flagHost string
 var flagPort int
-var flagSync stringSet
-var flagTag string
 var flagVerbose bool
 
 var ignores map[string]bool
@@ -32,18 +28,8 @@ Examples:
   tug start -c "make run"
 	`)
 
-	wd, _ := os.Getwd()
-
-	cmdStart.DefineStringFlagVar(&flagHost, "host", "", "nitro host to use")
-	cmdStart.AliasFlag('h', "host")
-	cmdStart.DefineFlag(&flagForward, "forward", "local:remote port to forward")
-	cmdStart.AliasFlag('f', "forward")
 	cmdStart.DefineIntFlagVar(&flagPort, "port", 5000, "base port")
 	cmdStart.AliasFlag('p', "port")
-	cmdStart.DefineFlag(&flagSync, "sync", "local:remote file or directory to sync")
-	cmdStart.AliasFlag('s', "sync")
-	cmdStart.DefineStringFlagVar(&flagTag, "tag", filepath.Base(wd), "docker tag to use")
-	cmdStart.AliasFlag('t', "tag")
 	cmdStart.DefineBoolFlagVar(&flagVerbose, "verbose", false, "show verbose output")
 	cmdStart.AliasFlag('v', "verbose")
 
