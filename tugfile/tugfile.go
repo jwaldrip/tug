@@ -126,8 +126,9 @@ func (tf *Tugfile) Build() {
 			process.Tag = process.Command
 		case "local":
 			if tf.Docker {
-				tag, cmd := docker.Build(tf.Root, process.Name)
-				process.Tag = tag
+				abs, _ := filepath.Abs(tf.Root)
+				process.Tag = fmt.Sprintf("%s.%s", filepath.Base(abs), process.Name)
+				cmd := docker.Build(tf.Root, process.Tag)
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
 				cmd.Run()

@@ -18,6 +18,7 @@ func init() {
 		command.Start,
 		command.Shell,
 		command.Run,
+		command.Build,
 	)
 }
 

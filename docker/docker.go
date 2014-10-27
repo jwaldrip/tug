@@ -1,17 +1,13 @@
 package docker
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
-func Build(path, name string) (string, *exec.Cmd) {
-	abs, _ := filepath.Abs(path)
-	tag := fmt.Sprintf("%s.%s", filepath.Base(abs), name)
-	return tag, exec.Command("docker", "build", "--rm", "-t", tag, path)
+func Build(path, tag string) *exec.Cmd {
+	return exec.Command("docker", "build", "--rm", "-t", tag, path)
 }
 
 func ExecInteractive(tag string, command ...string) *exec.Cmd {
@@ -66,4 +62,8 @@ func Stop(tag string) {
 
 	stop := exec.Command("docker", "rm", tag)
 	stop.Run()
+}
+
+func Tag(from, to string) *exec.Cmd {
+	return exec.Command("docker", "tag", "-f", from, to)
 }
