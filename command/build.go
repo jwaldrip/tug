@@ -21,6 +21,7 @@ Examples:
 
   tug build
   tug build -p myapp
+  tug build -p registry.mycompany.com/myapp
 	`)
 	Build.DefineStringFlag("prefix", "", "prefix for docker image tags")
 	Build.AliasFlag('p', "prefix")
