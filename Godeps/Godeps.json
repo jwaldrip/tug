@@ -2,12 +2,17 @@
 	"ImportPath": "github.com/nitrous-io/tug",
 	"GoVersion": "go1.3.3",
 	"Packages": [
-		"."
+		"./..."
 	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/inconshreveable/muxado",
 			"Rev": "f693c7e88ba316d1a0ae3e205e22a01aa3ec2848"
+		},
+		{
+			"ImportPath": "github.com/jwaldrip/odin/cli",
+			"Comment": "v1.6.0",
+			"Rev": "4c5385b8d28ed0041f0054890ba8059f3245d6b7"
 		},
 		{
 			"ImportPath": "github.com/mgutz/ansi",

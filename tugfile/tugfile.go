@@ -1,4 +1,4 @@
-package main
+package tugfile
 
 import (
 	"bufio"
@@ -14,6 +14,9 @@ import (
 	"sync"
 
 	"github.com/nitrous-io/tug/Godeps/_workspace/src/github.com/inconshreveable/muxado"
+	"github.com/nitrous-io/tug/docker"
+	"github.com/nitrous-io/tug/dockerfile"
+	"github.com/nitrous-io/tug/helpers"
 )
 
 type Tugfile struct {
@@ -42,7 +45,7 @@ type TugfileProcess struct {
 var TugfileLineMatcher = regexp.MustCompile(`^([A-Za-z0-9-_]+):\s*(.*)$`)
 var TugfileLineDocker = regexp.MustCompile(`^docker/(.*)$`)
 
-func NewTugfile(filename string) (*Tugfile, error) {
+func New(filename string) (*Tugfile, error) {
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return nil, nil
 	}
@@ -79,7 +82,7 @@ func NewTugfile(filename string) (*Tugfile, error) {
 	return tf, nil
 }
 
-func DefaultTugfile(df *Dockerfile) (*Tugfile, error) {
+func Default(df *dockerfile.Dockerfile) (*Tugfile, error) {
 	return TugfileFromReader(strings.NewReader(fmt.Sprintf("cmd[public]: local/%s", df.Command)))
 }
 
@@ -114,7 +117,7 @@ func TugfileFromReader(reader io.Reader) (*Tugfile, error) {
 }
 
 func (tf *Tugfile) Build() {
-	gateway, _ := DockerRun("ddollar/docker-gateway").Output()
+	gateway, _ := docker.Run("ddollar/docker-gateway").Output()
 	tf.Gateway = strings.TrimSpace(string(gateway))
 
 	for _, process := range tf.Processes {
@@ -123,7 +126,7 @@ func (tf *Tugfile) Build() {
 			process.Tag = process.Command
 		case "local":
 			if tf.Docker {
-				tag, cmd := DockerBuild(tf.Root, process.Name)
+				tag, cmd := docker.Build(tf.Root, process.Name)
 				process.Tag = tag
 				cmd.Stdout = os.Stdout
 				cmd.Stderr = os.Stderr
@@ -134,9 +137,9 @@ func (tf *Tugfile) Build() {
 }
 
 func (tf *Tugfile) ResolveLinks() {
-	DockerStop(tf.DockerName("forward"))
+	docker.Stop(tf.DockerName("forward"))
 	local, remote := net.Pipe()
-	forward := DockerRun("-i", "--privileged", "--name", tf.DockerName("forward"), "nitrousio/docker-forward")
+	forward := docker.Run("-i", "--privileged", "--name", tf.DockerName("forward"), "nitrousio/docker-forward")
 	forward.Stdin = remote
 	forward.Stdout = remote
 	forward.Start()
@@ -147,7 +150,7 @@ func (tf *Tugfile) ResolveLinks() {
 	for psidx, ps := range tf.Processes {
 		switch ps.Adapter {
 		case "docker":
-			for portidx, port := range DockerPorts(ps.Tag) {
+			for portidx, port := range docker.Ports(ps.Tag) {
 				ext := tf.BasePort + (psidx * 100) + portidx
 				prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(ps.Name), port)
 				links[prefix] = strconv.Itoa(ext)
@@ -156,7 +159,7 @@ func (tf *Tugfile) ResolveLinks() {
 			}
 		case "local":
 			if tf.Docker {
-				for portidx, port := range DockerPorts(ps.Tag) {
+				for portidx, port := range docker.Ports(ps.Tag) {
 					ext := tf.BasePort + (psidx * 100) + portidx
 					prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(ps.Name), port)
 					links[prefix] = strconv.Itoa(ext)
@@ -248,22 +251,22 @@ func (tf *Tugfile) DockerRun(process *TugfileProcess, command string) *exec.Cmd 
 		args = append(args, command)
 	}
 
-	return DockerRun(args...)
+	return docker.Run(args...)
 }
 
 func (tf *Tugfile) startProcess(process *TugfileProcess, port int, wg *sync.WaitGroup) {
 	r, w := io.Pipe()
 	switch process.Adapter {
 	case "docker":
-		DockerStop(tf.DockerName(process.Name))
+		docker.Stop(tf.DockerName(process.Name))
 		cmd := tf.DockerRun(process, "")
 		cmd.Stdout = w
 		cmd.Stderr = w
 		cmd.Start()
 	case "local":
 		if tf.Docker {
-			DockerStop(tf.DockerName(process.Name))
-			df, _ := NewDockerfile(filepath.Join(tf.Root, "Dockerfile"))
+			docker.Stop(tf.DockerName(process.Name))
+			df, _ := dockerfile.New(filepath.Join(tf.Root, "Dockerfile"))
 			for _, add := range df.Add {
 				process.Sync[add.Local] = add.Remote
 			}
@@ -297,7 +300,7 @@ func (tf *Tugfile) forwardPort(port int, dest string) {
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 
 	if err != nil {
-		die(err)
+		helpers.Die(err)
 	}
 
 	defer l.Close()

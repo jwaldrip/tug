@@ -1,4 +1,4 @@
-package main
+package dockerfile
 
 import (
 	"bufio"
@@ -23,7 +23,7 @@ type Dockerfile struct {
 	Workdir string
 }
 
-func NewDockerfile(filename string) (*Dockerfile, error) {
+func New(filename string) (*Dockerfile, error) {
 	df := &Dockerfile{}
 
 	f, err := os.Open(filename)
