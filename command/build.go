@@ -29,7 +29,6 @@ Examples:
 
 func runBuild(c cli.Command) {
 	prefix := c.Flag("prefix").Get()
-	fmt.Printf("prefix %+v\n", prefix)
 
 	tf, err := tugfile.New("./Tugfile")
 
