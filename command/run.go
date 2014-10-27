@@ -9,11 +9,11 @@ import (
 	"github.com/nitrous-io/tug/docker"
 )
 
-var Run = cli.NewSubCommand("run", "Run a command on an running container.", runRun)
+var Run = cli.NewSubCommand("run", "Run a command on an running container", runRun)
 
 func init() {
 	Run.SetLongDescription(`
-Run a command on an running container.
+Run a command on an running container
 
 Examples:
 

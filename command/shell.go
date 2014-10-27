@@ -9,11 +9,11 @@ import (
 	"github.com/nitrous-io/tug/docker"
 )
 
-var Shell = cli.NewSubCommand("shell", "Open a shell in a running container.", runShell)
+var Shell = cli.NewSubCommand("shell", "Open a shell in a running container", runShell)
 
 func init() {
 	Shell.SetLongDescription(`
-Open a shell on a running container.
+Open a shell on a running container
 
 Examples:
 
