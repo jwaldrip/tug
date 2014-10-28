@@ -40,7 +40,7 @@ func runBuild(c cli.Command) {
 		helpers.Die(fmt.Errorf("no Tugfile found"))
 	}
 
-	if !tf.Docker {
+	if !tf.HasDockerfile {
 		for _, process := range tf.Processes {
 			if process.Adapter == "local" {
 				helpers.Die(fmt.Errorf("no Dockerfile found"))

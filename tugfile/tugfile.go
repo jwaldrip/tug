@@ -20,13 +20,13 @@ import (
 )
 
 type Tugfile struct {
-	BasePort  int
-	Docker    bool
-	Env       map[string]string
-	Gateway   string
-	Name      string
-	Processes []*TugfileProcess
-	Root      string
+	BasePort      int
+	HasDockerfile bool
+	Env           map[string]string
+	Gateway       string
+	Name          string
+	Processes     []*TugfileProcess
+	Root          string
 
 	forward muxado.Session
 }
@@ -67,9 +67,9 @@ func New(filename string) (*Tugfile, error) {
 	tf.Root = filepath.Dir(filename)
 
 	if _, err = os.Stat(filepath.Join(tf.Root, "Dockerfile")); os.IsNotExist(err) {
-		tf.Docker = false
+		tf.HasDockerfile = false
 	} else {
-		tf.Docker = true
+		tf.HasDockerfile = true
 	}
 
 	if _, err = os.Stat(filepath.Join(tf.Root, ".env")); !os.IsNotExist(err) {
@@ -125,7 +125,7 @@ func (tf *Tugfile) Build() {
 		case "docker":
 			process.Tag = process.Command
 		case "local":
-			if tf.Docker {
+			if tf.HasDockerfile {
 				abs, _ := filepath.Abs(tf.Root)
 				process.Tag = fmt.Sprintf("%s.%s", filepath.Base(abs), process.Name)
 				cmd := docker.Build(tf.Root, process.Tag)
@@ -159,7 +159,7 @@ func (tf *Tugfile) ResolveLinks() {
 				go tf.forwardPort(ext, fmt.Sprintf("%s:%d", tf.Gateway, ext))
 			}
 		case "local":
-			if tf.Docker {
+			if tf.HasDockerfile {
 				for portidx, port := range docker.Ports(ps.Tag) {
 					ext := tf.BasePort + (psidx * 100) + portidx
 					prefix := fmt.Sprintf("%s_PORT_%s_TCP", strings.ToUpper(ps.Name), port)
@@ -173,13 +173,13 @@ func (tf *Tugfile) ResolveLinks() {
 				links[prefix] = strconv.Itoa(port)
 			}
 		}
-		if !(ps.Adapter == "local" && tf.Docker) {
+		if !(ps.Adapter == "local" && tf.HasDockerfile) {
 		}
 	}
 
 	for _, ps := range tf.Processes {
 		for prefix, port := range links {
-			if ps.Adapter == "local" && !tf.Docker {
+			if ps.Adapter == "local" && !tf.HasDockerfile {
 				ps.Env[prefix] = fmt.Sprintf("tcp://127.0.0.1:%s", port)
 				ps.Env[fmt.Sprintf("%s_ADDR", prefix)] = "127.0.0.1"
 				ps.Env[fmt.Sprintf("%s_PORT", prefix)] = port
@@ -266,7 +266,7 @@ func (tf *Tugfile) startProcess(process *TugfileProcess, port int, wg *sync.Wait
 		cmd.Start()
 	case "local":
 		bootstrapCommand := fmt.Sprintf("if [ -x bin/bootstrap ]; then bin/bootstrap; fi; %s", process.Command)
-		if tf.Docker {
+		if tf.HasDockerfile {
 			docker.Stop(tf.DockerName(process.Name))
 			df, _ := dockerfile.New(filepath.Join(tf.Root, "Dockerfile"))
 			for _, add := range df.Add {
