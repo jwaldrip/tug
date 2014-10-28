@@ -14,7 +14,7 @@ Use Docker for development
 
 ## Set up your application
     
-### Create a Tugfile
+#### Create a Tugfile
 
     web:      bin/web -p $PORT
     postgres: docker/postgres:9.3.5
@@ -22,7 +22,7 @@ Use Docker for development
 
 > Any command that starts with `docker/` will be interpreted as a docker image tag.
 
-### Create `bin/bootstrap`
+#### Create `bin/bootstrap`
 
 If your app needs to do any setup before it starts, put it in a `bin/bootstrap` file:
 
