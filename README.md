@@ -11,14 +11,26 @@ Use Docker for development
 ## Installation
 
     $ go get github.com/nitrous-io/tug
+
+## Set up your application
     
-## Create a Tugfile
+### Create a Tugfile
 
     web:      bin/web -p $PORT
     postgres: docker/postgres:9.3.5
     redis:    docker/redis:2.8.9
 
-If any command starts with `docker/` the rest will be interpreted as a docker image tag.
+> Any command that starts with `docker/` will be interpreted as a docker image tag.
+
+### Create `bin/bootstrap`
+
+If your app needs to do any setup before it starts, put it in a `bin/bootstrap` file:
+
+    $ cat bin/bootstrap
+    #!/bin/sh
+    bundle exec rake db:migrate
+
+> Make sure your `bin/bootstrap` has a +x bit set.
 
 ## Start the app
 
