@@ -26,7 +26,6 @@ Use Docker for development
 
 If your app needs to do any setup before it starts, put it in a `bin/bootstrap` file:
 
-    $ cat bin/bootstrap
     #!/bin/sh
     bundle exec rake db:migrate
 
