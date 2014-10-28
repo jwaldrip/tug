@@ -265,18 +265,19 @@ func (tf *Tugfile) startProcess(process *TugfileProcess, port int, wg *sync.Wait
 		cmd.Stderr = w
 		cmd.Start()
 	case "local":
+		bootstrapCommand := fmt.Sprintf("if [ -x bin/bootstrap ]; then bin/bootstrap; fi; %s", process.Command)
 		if tf.Docker {
 			docker.Stop(tf.DockerName(process.Name))
 			df, _ := dockerfile.New(filepath.Join(tf.Root, "Dockerfile"))
 			for _, add := range df.Add {
 				process.Sync[add.Local] = add.Remote
 			}
-			cmd := tf.DockerRun(process, process.Command)
+			cmd := tf.DockerRun(process, bootstrapCommand)
 			cmd.Stdout = w
 			cmd.Stderr = w
 			cmd.Start()
 		} else {
-			cmd := exec.Command("bash", "-c", process.Command)
+			cmd := exec.Command("bash", "-c", bootstrapCommand)
 			cmd.Env = os.Environ()
 			for _, item := range tf.envAsArray(tf.Env) {
 				cmd.Env = append(cmd.Env, item)
