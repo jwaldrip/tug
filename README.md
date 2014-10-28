@@ -30,7 +30,7 @@ If your app needs to do any setup before it starts, put it in a `bin/bootstrap` 
     #!/bin/sh
     bundle exec rake db:migrate
 
-> Make sure your `bin/bootstrap` has a +x bit set.
+> Make sure your `bin/bootstrap` is executable, i.e. `chmod +x bin/bootstrap`
 
 ## Start the app
 
