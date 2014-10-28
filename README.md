@@ -22,7 +22,7 @@ Use Docker for development
 
 > Any command that starts with `docker/` will be interpreted as a docker image tag.
 
-#### Create `bin/bootstrap`
+#### Create a bootstrap script
 
 If your app needs to do any setup before it starts, put it in a `bin/bootstrap` file:
 
