@@ -48,6 +48,10 @@ func Pull(tag string) *exec.Cmd {
 	return exec.Command("docker", "pull", tag)
 }
 
+func Push(tag string) *exec.Cmd {
+	return exec.Command("docker", "push", tag)
+}
+
 func Run(args ...string) *exec.Cmd {
 	runargs := []string{"run"}
 	for _, arg := range args {
