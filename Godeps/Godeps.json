@@ -11,8 +11,8 @@
 		},
 		{
 			"ImportPath": "github.com/jwaldrip/odin/cli",
-			"Comment": "v1.6.0",
-			"Rev": "4c5385b8d28ed0041f0054890ba8059f3245d6b7"
+			"Comment": "v1.6.2",
+			"Rev": "a23dfcbe4d5b03f4b55904ade2132a503774d656"
 		},
 		{
 			"ImportPath": "github.com/mgutz/ansi",
